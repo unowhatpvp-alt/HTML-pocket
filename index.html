@@ -6,13 +6,24 @@
   <meta name="theme-color" content="#f5f6f2">
   <meta name="description" content="在手机或电脑上打开 HTML 文件、粘贴代码并即时预览。文件内容在当前浏览器内处理。">
   <title>HTML Pocket · 随身 HTML 查看器</title>
-  <style>
+  <script>
+let currentLanguage = 'zh';
+let currentTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+try { const lang = localStorage.getItem('html-pocket.language'); if (lang === 'en' || lang === 'zh') currentLanguage = lang; const theme = localStorage.getItem('html-pocket.theme'); if (theme === 'dark' || theme === 'light') currentTheme = theme; } catch {}
+document.documentElement.dataset.theme = currentTheme;
+document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'zh-CN';
+</script>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 :root{font-family:'DM Sans','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#263c35;background:#f5f6f2;font-synthesis:none;--green:#235c45;--line:#dfe5dc;--muted:#7b887f}*{box-sizing:border-box}body{margin:0}button,a,input,textarea{-webkit-tap-highlight-color:transparent}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #77ae90;outline-offset:3px}button{border:0}button:disabled{opacity:.4;cursor:default}a{color:inherit;text-decoration:none}.app{max-width:1720px;margin:auto}.topbar{height:92px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:24px;padding:0 4.2%}.brand{display:flex;gap:11px;align-items:center;font-size:22px;letter-spacing:-.6px}.brand b{font-weight:500}.brand small{display:block;font-size:10px;color:#869289;letter-spacing:1.5px;margin-top:2px}.brand-icon{font-family:monospace;font-weight:700;font-size:19px;background:#e2ebdd;width:41px;height:41px;border-radius:12px;display:grid;place-items:center;color:var(--green)}.local-badge{margin-left:auto;font-size:11px;color:#6e8074;display:flex;gap:7px;align-items:center}.local-badge i,.live-dot{width:6px;height:6px;background:#58936c;border-radius:50%;display:inline-block}.icon-button{width:30px;height:30px;border:1px solid #cfd9ce;border-radius:50%;color:#6b7f70;background:transparent;font-size:15px}main{padding:43px 4.2% 15px}.intro{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:37px}.eyebrow{font-size:10px;font-weight:600;letter-spacing:2px;color:#7d8d7c;margin:0 0 13px}h1{font-size:clamp(25px,2.3vw,36px);letter-spacing:-1.1px;font-weight:600;margin:0;line-height:1.5}h1 span{color:#8ba77d}.subtitle{font-size:12px;color:#7a867e;margin:11px 0 0;line-height:1.8}.button{border-radius:8px;padding:12px 18px;font-size:12px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:12px;white-space:nowrap}.primary{background:var(--green);color:#fff;box-shadow:0 3px 5px #235c4512}.primary:hover,.run-button:hover{background:#174531}.primary>span{font-size:20px;line-height:1}.workspace-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;font-size:11px;gap:12px}.file-label{display:flex;align-items:center;gap:9px;min-width:0}.file-label>span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50vw}.file-icon{font:700 12px monospace;color:#7c9273;background:#e6ecdf;border-radius:3px;padding:4px}#modifiedBadge{font-size:9px;color:#9a8b59;background:#efeede;border-radius:4px;padding:3px 5px}.workspace-actions{display:flex;align-items:center;gap:12px}.text-button{background:none;color:#758677;font-size:10px;padding:8px 0}.text-button:hover{color:#235c45}.divider{height:12px;width:1px;background:var(--line)}.workspace{height:min(65vh,750px);min-height:470px;display:grid;grid-template-columns:1fr 1fr;border:1px solid #d9e1d4;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 6px 35px #203d2b04}.editor-panel,.preview-panel{min-width:0;min-height:0;display:flex;flex-direction:column}.editor-panel{border-right:1px solid var(--line)}.panel-toolbar{height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #e8ece4;background:#fbfcf9;gap:6px}.panel-title{font-size:10px;font-weight:500;letter-spacing:.5px;white-space:nowrap}.panel-toolbar>div{display:flex;align-items:center;gap:5px}.small-button{background:transparent;font-size:10px;color:#78877a;padding:7px 8px;border-radius:5px;white-space:nowrap}.small-button:hover{background:#eaf0e5;color:var(--green)}.editor-wrap{position:relative;display:flex;flex:1;min-height:0;background:#fbfcfa}.line-numbers{width:45px;flex-shrink:0;padding:22px 10px 22px 0;color:#bbc3b5;text-align:right;font:12px/1.9 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:hidden;user-select:none;white-space:pre}.editor-wrap textarea{border:0;outline:none;resize:none;background:transparent;color:#41624f;flex:1;width:100%;min-width:0;padding:22px 20px 22px 5px;tab-size:2;font:12px/1.9 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre;overflow:auto}.editor-wrap textarea::placeholder{color:#a7b2a0}.editor-footer,.preview-footer{height:48px;flex-shrink:0;border-top:1px solid #e8ece4;display:flex;justify-content:space-between;align-items:center;padding:0 17px;font-size:9px;color:#879382;background:#fbfcf9;gap:8px}label{display:flex;align-items:center;gap:5px;white-space:nowrap}input[type=checkbox]{accent-color:var(--green);width:12px;height:12px;margin:0}.preview-toolbar .panel-title{display:flex;align-items:center;gap:7px}.device-switch{display:flex;border:1px solid #e2e7dc;border-radius:5px;padding:2px;gap:1px}.device-switch button{height:23px;width:28px;border-radius:3px;background:none;color:#8c9888;font-size:18px;line-height:1}.device-switch .selected{background:#e7eddf;color:#406d48}.preview-address{height:33px;flex-shrink:0;display:flex;align-items:center;gap:8px;border-bottom:1px solid #eef0eb;padding:0 14px;font-size:9px;color:#94a08e;background:#fff}.preview-address>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.preview-address button{margin-left:auto;background:none;color:#72816e;font-size:19px;padding:1px 5px}.preview-stage{position:relative;flex:1;min-height:0;display:flex;justify-content:center;overflow:hidden;background-color:#f5f7f1;background-image:radial-gradient(#d9e2d1 .65px,transparent .65px);background-size:13px 13px}.empty-state{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px;max-width:100%}.empty-illustration{width:112px;height:90px;border:1px solid #bacab1;border-radius:10px;background:#eff4e8;transform:rotate(-5deg);margin-bottom:27px;box-shadow:8px 9px 0 #e4ebdc;overflow:hidden}.tiny-dots{height:20px;border-bottom:1px solid #c8d5c0;display:flex;gap:3px;align-items:center;padding-left:8px}.tiny-dots i{width:4px;height:4px;border-radius:50%;background:#b0c3a3}.empty-illustration>span{display:block;font:32px/65px monospace;color:#6c8d58}.empty-illustration b{color:#a9bd97;font-weight:400}.empty-state h2{font-size:16px;font-weight:500;letter-spacing:-.4px;margin:0 0 10px}.empty-state p{font-size:10px;color:#8c9985;line-height:1.8;margin:0 0 23px}.secondary{border:1px solid #d4dfca;background:#f8faf5;color:#607a51;font-size:10px;padding:9px 12px;gap:20px}.preview-stage iframe{width:100%;height:100%;border:0;background:#fff;transition:width .18s;min-width:0}.preview-stage.phone-mode iframe{width:min(390px,100%);box-shadow:0 0 20px #24412a12}.run-button{padding:7px 12px;font-size:10px;background:var(--green);color:white;border-radius:6px;gap:20px}.bottom-notes{display:flex;justify-content:space-between;gap:20px;font-size:9px;color:#99a190;margin-top:12px}.bottom-notes p{margin:0;line-height:1.8}.bottom-notes p:last-child{white-space:nowrap}.bottom-notes span{padding:0 5px;color:#829479}.mobile-tabs{display:none}.drop-cover{display:none;position:absolute;inset:8px;border:2px dashed #689559;background:#eff5e9ef;align-items:center;justify-content:center;border-radius:8px;font-size:14px;pointer-events:none}.dragging .drop-cover{display:flex}.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);max-width:90vw;background:#263f31;color:#fff;padding:12px 20px;border-radius:10px;font-size:12px;z-index:100;box-shadow:0 5px 25px #0002;text-align:center;line-height:1.6}dialog{border:1px solid #d4dfcb;border-radius:16px;padding:24px;max-width:500px;width:calc(100% - 32px);color:#344d3a;background:#fafcf7;box-shadow:0 10px 70px #0002}dialog::backdrop{background:#172b1f60;backdrop-filter:blur(3px)}.dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:15px}.dialog-heading h2{font-size:18px;margin:0}dialog li,dialog p{font-size:12px;line-height:1.9}dialog ol{padding-left:20px}dialog li{margin:12px 0}dialog p{color:#7a8874}.close-fullscreen{display:none}.fullscreen-preview{position:fixed!important;inset:0!important;width:100%!important;height:100dvh!important;z-index:50;background:#fff;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}.fullscreen-preview .close-fullscreen{display:inline-flex;background:#e8efdf;color:#3d623b;padding:7px 12px;font-size:10px}.fullscreen-preview .preview-stage iframe{width:100%}.fullscreen-preview .preview-footer{height:52px}.no-scroll{overflow:hidden}[hidden]{display:none!important}
 @media(min-width:1500px){.editor-wrap textarea,.line-numbers{font-size:13px}.workspace{height:66vh}.panel-title,.small-button{font-size:11px}}
 @media(max-width:850px){.topbar{height:76px}.intro{align-items:flex-start;flex-direction:column;gap:20px;margin-bottom:26px}main{padding-top:28px}.primary{padding:11px 15px}.workspace{min-height:480px;height:65vh;grid-template-columns:46% 54%}.panel-toolbar{padding:0 10px}.small-button{padding:6px}.preview-controls{gap:0!important}.device-switch{display:none}.local-badge{font-size:9px}.bottom-notes p:last-child{display:none}}
 @media(max-width:600px){.topbar{padding:0 20px;height:72px;gap:12px}.brand{font-size:20px}.brand small{font-size:8px}.brand-icon{height:36px;width:36px;font-size:16px}.local-badge{margin-left:auto;font-size:0;gap:0}.local-badge i{width:7px;height:7px}.icon-button{width:27px;height:27px}main{padding:27px 16px 18px}.eyebrow{font-size:8px;letter-spacing:1.6px;margin-bottom:9px}h1{font-size:25px;letter-spacing:-1px}.subtitle{font-size:11px;max-width:300px;margin-top:8px}.intro{gap:19px;margin-bottom:23px}.primary{width:100%;height:46px;font-size:12px;border-radius:9px}.workspace-bar{font-size:10px;margin-bottom:10px}.file-label{gap:6px}.file-label>span:nth-child(2){max-width:36vw}.workspace-actions{gap:8px}.text-button{font-size:9px}#modifiedBadge{display:none}.mobile-tabs{display:flex;background:#e9eee3;border:1px solid #dfe6d8;border-radius:9px;padding:4px;margin-bottom:12px;gap:4px}.mobile-tabs button{flex:1;padding:9px;border-radius:6px;color:#7e8b74;background:transparent;font-size:11px}.mobile-tabs button[aria-selected=true]{background:#fff;color:#365d3d;box-shadow:0 1px 4px #2233110b}.workspace{display:flex;flex-direction:column;height:62dvh;min-height:420px;border-radius:10px}.editor-panel,.preview-panel{flex:1}.editor-panel{border:0}.workspace[data-view=code]>.preview-panel{display:none}.workspace[data-view=preview]>.editor-panel{display:none}.panel-toolbar{height:45px;padding:0 13px}.panel-title{font-size:10px}.small-button{font-size:10px;padding:7px 8px}.editor-wrap textarea,.line-numbers{font-size:13px;line-height:1.8}.line-numbers{width:36px;padding-top:18px}.editor-wrap textarea{padding-top:18px;padding-left:5px}.editor-footer,.preview-footer{padding:0 12px;font-size:9px}.empty-state h2{font-size:15px}.empty-state p{font-size:10px}.empty-illustration{width:100px;height:83px}.preview-toolbar .device-switch{display:flex}.preview-toolbar .device-switch button{width:24px}.preview-address{font-size:9px}.run-button{font-size:10px}.bottom-notes{font-size:8px;margin-top:12px}.fullscreen-preview{display:flex!important}.fullscreen-preview .preview-toolbar{height:48px}.toast{bottom:calc(22px + env(safe-area-inset-bottom));font-size:11px}dialog{padding:20px}.dialog-heading h2{font-size:16px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+
+.appearance-controls{display:flex;align-items:center;gap:7px}.topbar{gap:17px}.setting-button{height:32px;min-width:38px;padding:0 9px;background:#e9eee3;border:1px solid #d7e0d1;color:#40614a;border-radius:8px;font-size:11px;font-weight:600}.setting-button:hover{background:#dce7d4}.theme-button{min-width:32px;font-size:18px;padding:0 6px}html{color-scheme:light}html[data-theme=dark]{color-scheme:dark;background:#141c19;color:#d7e4db;--green:#8bb79d;--line:#35443b;--muted:#a0b1a5}html[data-theme=dark] body{background:#141c19}html[data-theme=dark] .brand-icon{background:#2a4033;color:#b2d6ba}html[data-theme=dark] .local-badge,html[data-theme=dark] .subtitle,html[data-theme=dark] .eyebrow,html[data-theme=dark] .brand small{color:#a5b5a8}html[data-theme=dark] h1 span{color:#a9c199}html[data-theme=dark] .primary,html[data-theme=dark] .run-button{background:#8bb79d;color:#10271b}html[data-theme=dark] .primary:hover,html[data-theme=dark] .run-button:hover{background:#a2cbb0}html[data-theme=dark] .workspace{background:#1c2721;border-color:#35443b;box-shadow:0 6px 35px #0002}html[data-theme=dark] .panel-toolbar,html[data-theme=dark] .editor-footer,html[data-theme=dark] .preview-footer{background:#202c25;border-color:#35443b;color:#b0c0b2}html[data-theme=dark] .editor-wrap{background:#17221c}html[data-theme=dark] .editor-wrap textarea{color:#b8d2be}html[data-theme=dark] .editor-wrap textarea::placeholder{color:#7e9583}html[data-theme=dark] .line-numbers{color:#647b69}html[data-theme=dark] .small-button,html[data-theme=dark] .text-button{color:#aec0af}html[data-theme=dark] .small-button:hover{background:#344735;color:#dce8db}html[data-theme=dark] .preview-address{background:#1c2920;color:#a1b59f;border-color:#35443b}html[data-theme=dark] .preview-address button{color:#b2c4ad}html[data-theme=dark] .preview-stage{background-color:#18231c;background-image:radial-gradient(#344735 .65px,transparent .65px)}html[data-theme=dark] .empty-state p{color:#a2b39d}html[data-theme=dark] .empty-illustration{background:#2b3e2a;border-color:#65805c;box-shadow:8px 9px 0 #22331f}html[data-theme=dark] .tiny-dots{border-color:#486142}html[data-theme=dark] .empty-illustration>span{color:#aec29a}html[data-theme=dark] .secondary{background:#253421;border-color:#496040;color:#bdcdae}html[data-theme=dark] .file-icon{background:#2b3d2a;color:#b0c9a0}html[data-theme=dark] #modifiedBadge{background:#3e3d28;color:#d0c68d}html[data-theme=dark] .device-switch{border-color:#4a5e43}html[data-theme=dark] .device-switch button{color:#a8b99f}html[data-theme=dark] .device-switch .selected{background:#3a5030;color:#d1e0c1}html[data-theme=dark] .bottom-notes{color:#9eae97}html[data-theme=dark] .icon-button{border-color:#506249;color:#b7c7ae}html[data-theme=dark] .setting-button{background:#2c3c30;color:#d0dfcb;border-color:#435940}html[data-theme=dark] .setting-button:hover{background:#3b503a}html[data-theme=dark] dialog{background:#202e24;color:#d4e2cd;border-color:#4a6043}html[data-theme=dark] dialog p{color:#a8bba1}html[data-theme=dark] .mobile-tabs{background:#223020;border-color:#3a5032}html[data-theme=dark] .mobile-tabs button{color:#aabb9d}html[data-theme=dark] .mobile-tabs button[aria-selected=true]{background:#3d5333;color:#e2ebdc}html[data-theme=dark] .fullscreen-preview{background:#141c19}html[data-theme=dark] .fullscreen-preview .close-fullscreen{background:#3b5132;color:#e0ead6}html[data-theme=dark] .drop-cover{background:#243a29ef;color:#d0e5d2;border-color:#82b48b}.preview-stage iframe{color-scheme:light}
+@media(max-width:600px){.topbar{gap:10px;padding:0 16px}.topbar .local-badge{display:none}.appearance-controls{margin-left:auto;gap:6px}.brand{font-size:18px;gap:8px}.brand small{font-size:7px;letter-spacing:.4px}.setting-button{height:32px;min-width:36px;padding:0 7px;font-size:10px}.theme-button{min-width:32px;font-size:18px}.editor-wrap textarea,.line-numbers{font-size:16px}.preview-footer{flex-wrap:wrap;min-height:48px;height:auto;padding-top:8px;padding-bottom:8px}.editor-footer{font-size:8px}html[lang=en] h1{font-size:28px;line-height:1.2}html[lang=en] .small-button{font-size:9px;padding:6px}html[lang=en] .workspace-actions{gap:6px}html[lang=en] .empty-state h2{font-size:17px}html[lang=en] .panel-toolbar{padding:0 10px}html[lang=en] .device-switch{display:none}html[lang=en] .preview-footer{gap:5px}}
 
 </style>
   
@@ -22,7 +33,7 @@
     <header class="topbar">
       <a class="brand" href="./" aria-label="HTML Pocket 首页"><span class="brand-icon">&lt;/&gt;</span><span>HTML <b>Pocket</b><small>随身 HTML 查看器</small></span></a>
       <span class="local-badge"><i></i> 文件在浏览器内处理</span>
-      <button class="icon-button" id="helpButton" aria-label="使用说明" title="使用说明">?</button>
+      <div class="appearance-controls"><button id="languageButton" class="setting-button" type="button" aria-label="Switch to English" title="Switch to English">EN</button><button id="themeButton" class="setting-button theme-button" type="button" aria-label="切换到深色模式" title="切换到深色模式" aria-pressed="false">☾</button></div><button class="icon-button" id="helpButton" aria-label="使用说明" title="使用说明">?</button>
     </header>
 
     <main>
@@ -42,262 +53,7 @@
       <section class="workspace" id="workspace" data-view="code">
         <div class="editor-panel" id="editorPanel">
           <div class="panel-toolbar"><span class="panel-title">HTML 编辑器</span><div><button class="small-button" id="pasteButton">粘贴</button><button class="small-button" id="copyButton">复制</button><button class="small-button" id="clearButton">清空</button></div></div>
-          <div class="editor-wrap" id="dropZone"><div class="line-numbers" id="lineNumbers" aria-hidden="true">1</div><textarea id="editor" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="HTML 代码" placeholder="<!DOCTYPE html>&#10;<html lang=\"zh-CN\">&#10;  <body>&#10;    <h1>你好，世界。</h1>&#10;  <script>
-'use strict';
-const $ = id => document.getElementById(id);
-const editor = $('editor');
-const frame = $('previewFrame');
-const workspace = $('workspace');
-const sandbox = 'allow-scripts allow-forms allow-modals allow-popups allow-downloads';
-const draftKey = 'html-pocket.draft.v1';
-let fileName = '未命名.html';
-let renderTimer;
-let toastTimer;
-let pendingSource = '';
-let lastRendered = null;
-
-const example = `<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>一小片好天气</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center;
-      padding: 28px; background: #f6f0e4; color: #355344;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .card { max-width: 420px; text-align: center; }
-    .sun { width: 76px; height: 76px; border-radius: 50%; background: #e7ba59;
-      margin: 0 auto 28px; box-shadow: 0 0 0 15px #edcf8b33; }
-    .tag { font-size: 10px; letter-spacing: 3px; color: #8b9477; }
-    h1 { font-size: clamp(28px, 7vw, 40px); font-weight: 500; letter-spacing: -1px; }
-    p { line-height: 1.9; font-size: 13px; color: #7e8876; }
-    button { margin-top: 18px; padding: 13px 24px; border: none;
-      border-radius: 40px; background: #355344; color: #fff; cursor: pointer; }
-    #message { min-height: 26px; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <main class="card">
-    <div class="sun"></div>
-    <p class="tag">A LITTLE MOMENT FOR YOU</p>
-    <h1>今天，也有好事发生。</h1>
-    <p>一杯刚好的咖啡，一阵路过的风。<br>还有一段变成网页的小小代码。</p>
-    <button onclick="document.getElementById('message').textContent='愿你今天，收获一点小小的快乐。'">收下一点好心情 ↗</button>
-    <p id="message" aria-live="polite"></p>
-  </main>
-</body>
-</html>`;
-
-function toast(message) {
-  $('toast').textContent = message;
-  $('toast').hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4200);
-}
-
-function setView(view) {
-  workspace.dataset.view = view;
-  $('codeTab').setAttribute('aria-selected', String(view === 'code'));
-  $('previewTab').setAttribute('aria-selected', String(view === 'preview'));
-}
-
-function persistDraft() {
-  try {
-    if ($('rememberDraft').checked) {
-      localStorage.setItem(draftKey, JSON.stringify({ code: editor.value, name: fileName }));
-    } else localStorage.removeItem(draftKey);
-  } catch { toast('浏览器无法保存草稿；仍可正常查看和下载文件。'); }
-}
-
-function stats() {
-  const code = editor.value;
-  const count = code ? code.split('\n').length : 0;
-  $('codeStats').textContent = `${count.toLocaleString()} 行 · ${code.length.toLocaleString()} 字符`;
-  // Keep line numbering responsive for large documents.
-  $('lineNumbers').textContent = Array.from({ length: Math.min(count || 1, 15000) }, (_, i) => i + 1).join('\n');
-  $('lineNumbers').scrollTop = editor.scrollTop;
-  $('newTabButton').disabled = !code.trim();
-  $('downloadButton').disabled = !code.trim();
-  $('copyButton').disabled = !code;
-}
-
-function render(force = false) {
-  clearTimeout(renderTimer);
-  const code = editor.value;
-  if (!force && code === lastRendered) return;
-  lastRendered = code;
-  if (!code.trim()) {
-    frame.removeAttribute('srcdoc');
-    frame.src = 'about:blank';
-    frame.hidden = true;
-    $('emptyState').hidden = false;
-    $('previewAddress').textContent = '等待载入 HTML';
-    return;
-  }
-  frame.hidden = false;
-  $('emptyState').hidden = true;
-  frame.removeAttribute('src');
-  frame.srcdoc = code;
-  $('previewAddress').textContent = `${fileName} · 浏览器本地预览`;
-}
-
-function update({ modified = true, immediate = false } = {}) {
-  stats();
-  $('modifiedBadge').hidden = !modified;
-  persistDraft();
-  clearTimeout(renderTimer);
-  if (immediate) render(true);
-  else if ($('autoPreview').checked) renderTimer = setTimeout(() => render(), 550);
-}
-
-function setDocument(code, name, showPreview = true) {
-  editor.value = code;
-  fileName = name;
-  $('fileName').textContent = name;
-  editor.scrollTop = 0;
-  update({ modified: false, immediate: true });
-  if (showPreview) setView('preview');
-}
-
-function replaceDocument(code, name) {
-  // Browser confirmation is used only when replacing an unsaved, nonempty document.
-  if (editor.value.trim() && editor.value !== code && !confirm('这会替换当前代码。需要保留的话，请先取消并下载 HTML。继续替换？')) return;
-  setDocument(code, name);
-}
-
-async function openFile(file) {
-  if (!file) return;
-  if (!/\.html?$/i.test(file.name) && file.type !== 'text/html') {
-    toast('请选择 .html 或 .htm 文件。'); return;
-  }
-  if (file.size > 20 * 1024 * 1024) { toast('文件超过 20 MB，请精简后再打开。'); return; }
-  try {
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    let code;
-    if (bytes[0] === 0xff && bytes[1] === 0xfe) code = new TextDecoder('utf-16le').decode(bytes);
-    else if (bytes[0] === 0xfe && bytes[1] === 0xff) code = new TextDecoder('utf-16be').decode(bytes);
-    else {
-      const head = new TextDecoder('windows-1252').decode(bytes.slice(0, 2048));
-      const charset = head.match(/<meta\b[^>]*charset\s*=\s*["']?\s*([\w-]+)/i)?.[1] || 'utf-8';
-      try { code = new TextDecoder(charset).decode(bytes); }
-      catch { code = new TextDecoder('utf-8').decode(bytes); }
-    }
-    replaceDocument(code, file.name);
-  } catch { toast('无法读取文件，请重新选择。'); }
-}
-
-function newTab() {
-  if (!editor.value.trim()) { toast('请先打开文件或粘贴 HTML。'); return; }
-  // Open synchronously in the user gesture so mobile Safari can allow the tab.
-  const tab = window.open('about:blank', '_blank');
-  if (!tab) { toast('浏览器拦截了新标签页，请允许弹出窗口，或使用“全屏”。'); return; }
-  try {
-    tab.opener = null;
-    tab.document.open();
-    tab.document.write('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HTML 预览</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}iframe{border:0;width:100%;height:100%;display:block;background:white}</style></head><body></body></html>');
-    tab.document.close();
-    const child = tab.document.createElement('iframe');
-    child.title = 'HTML 网页预览';
-    child.setAttribute('sandbox', sandbox);
-    child.referrerPolicy = 'no-referrer';
-    child.srcdoc = editor.value;
-    tab.document.title = fileName + ' · 预览';
-    tab.document.body.appendChild(child);
-  } catch { tab.close(); toast('新标签页未能打开，请使用“全屏”查看。'); }
-}
-
-function setFullscreen(on) {
-  if (on) { render(); setView('preview'); }
-  $('previewPanel').classList.toggle('fullscreen-preview', on);
-  document.body.classList.toggle('no-scroll', on);
-  $('expandButton').setAttribute('aria-expanded', String(on));
-  if (on) $('closeFullscreen').focus(); else $('expandButton').focus();
-}
-
-$('uploadButton').addEventListener('click', () => { $('fileInput').value = ''; $('fileInput').click(); });
-$('fileInput').addEventListener('change', e => openFile(e.target.files[0]));
-editor.addEventListener('input', () => update());
-editor.addEventListener('scroll', () => { $('lineNumbers').scrollTop = editor.scrollTop; });
-editor.addEventListener('keydown', event => {
-  if (event.key === 'Tab') {
-    event.preventDefault();
-    const start = editor.selectionStart;
-    editor.setRangeText('  ', start, editor.selectionEnd, 'end');
-    update();
-  }
-  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-    event.preventDefault(); render(true); setView('preview');
-  }
-});
-$('runButton').addEventListener('click', () => { render(true); setView('preview'); });
-$('refreshButton').addEventListener('click', () => render(true));
-$('autoPreview').addEventListener('change', () => { clearTimeout(renderTimer); if ($('autoPreview').checked) render(true); });
-$('rememberDraft').addEventListener('change', () => { persistDraft(); toast($('rememberDraft').checked ? '草稿将保存在当前浏览器中。' : '已关闭草稿记忆并移除保存的内容。'); });
-$('codeTab').addEventListener('click', () => setView('code'));
-$('previewTab').addEventListener('click', () => { render(); setView('preview'); });
-for (const id of ['codeTab', 'previewTab']) $(id).addEventListener('keydown', e => {
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { const next = id === 'codeTab' ? 'previewTab' : 'codeTab'; $(next).focus(); $(next).click(); e.preventDefault(); }
-});
-for (const id of ['exampleButton', 'emptyExampleButton']) $(id).addEventListener('click', () => replaceDocument(example, '好天气.html'));
-$('clearButton').addEventListener('click', () => {
-  if (editor.value && !confirm('清空当前 HTML？需要保留的话，请先取消并下载。')) return;
-  setDocument('', '未命名.html', false); setView('code'); editor.focus();
-});
-$('pasteButton').addEventListener('click', async () => {
-  if (!navigator.clipboard?.readText) { setView('code'); editor.focus(); toast('请在编辑区长按，选择“粘贴”。'); return; }
-  try {
-    const text = await navigator.clipboard.readText();
-    if (!text.trim()) { toast('剪贴板没有文字，请复制 HTML 后再试。'); return; }
-    replaceDocument(text, '粘贴的网页.html');
-  } catch { setView('code'); editor.focus(); toast('请在编辑区长按，选择“粘贴”。'); }
-});
-$('copyButton').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(editor.value); toast('HTML 代码已复制。'); }
-  catch { setView('code'); editor.focus(); editor.select(); toast('已选中代码，请使用系统的复制命令。'); }
-});
-$('downloadButton').addEventListener('click', () => {
-  const blob = new Blob([editor.value], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url; link.download = /\.html?$/i.test(fileName) ? fileName : fileName + '.html';
-  document.body.appendChild(link); link.click(); link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-});
-$('newTabButton').addEventListener('click', newTab);
-$('expandButton').addEventListener('click', () => setFullscreen(!$('previewPanel').classList.contains('fullscreen-preview')));
-$('closeFullscreen').addEventListener('click', () => setFullscreen(false));
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('previewPanel').classList.contains('fullscreen-preview')) setFullscreen(false); });
-function setDevice(phone) {
-  $('previewStage').classList.toggle('phone-mode', phone);
-  $('wideButton').classList.toggle('selected', !phone);
-  $('phoneButton').classList.toggle('selected', phone);
-  $('wideButton').setAttribute('aria-pressed', String(!phone));
-  $('phoneButton').setAttribute('aria-pressed', String(phone));
-}
-$('wideButton').addEventListener('click', () => setDevice(false));
-$('phoneButton').addEventListener('click', () => setDevice(true));
-$('helpButton').addEventListener('click', () => $('helpDialog').showModal());
-$('closeHelp').addEventListener('click', () => $('helpDialog').close());
-$('helpDialog').addEventListener('click', e => { if (e.target === $('helpDialog')) { const r = $('helpDialog').getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) $('helpDialog').close(); } });
-let dragCounter = 0;
-const dropZone = $('dropZone');
-dropZone.addEventListener('dragenter', e => { e.preventDefault(); dragCounter++; dropZone.classList.add('dragging'); });
-dropZone.addEventListener('dragover', e => { e.preventDefault(); });
-dropZone.addEventListener('dragleave', () => { if (--dragCounter <= 0) { dragCounter = 0; dropZone.classList.remove('dragging'); } });
-dropZone.addEventListener('drop', e => { e.preventDefault(); dragCounter = 0; dropZone.classList.remove('dragging'); openFile(e.dataTransfer.files[0]); });
-try {
-  const saved = JSON.parse(localStorage.getItem(draftKey) || 'null');
-  if (saved && typeof saved.code === 'string' && typeof saved.name === 'string') {
-    $('rememberDraft').checked = true;
-    setDocument(saved.code, saved.name, false);
-  }
-} catch { /* Storage may be unavailable in private browsing. */ }
-stats();
-
-</script>
-</body>&#10;</html>&#10;&#10;在这里粘贴 HTML，或打开一个文件…"></textarea><div class="drop-cover">松开，打开这个 HTML 文件</div></div>
+          <div class="editor-wrap" id="dropZone"><div class="line-numbers" id="lineNumbers" aria-hidden="true">1</div><textarea id="editor" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="HTML 代码" placeholder="<!DOCTYPE html>&#10;<html lang=&quot;zh-CN&quot;>&#10;  <body>&#10;    <h1>你好，世界。</h1>&#10;  </body>&#10;</html>&#10;&#10;在这里粘贴 HTML，或打开一个文件…"></textarea><div class="drop-cover">松开，打开这个 HTML 文件</div></div>
           <div class="editor-footer"><span id="codeStats">0 行 · 0 字符</span><label><input type="checkbox" id="rememberDraft"> 在此设备记住草稿</label></div>
         </div>
 
@@ -317,6 +73,68 @@ stats();
   <div class="toast" id="toast" role="status" hidden></div>
   <dialog id="helpDialog"><div class="dialog-heading"><h2>口袋里的网页查看器</h2><button class="icon-button" id="closeHelp" aria-label="关闭使用说明">×</button></div><ol><li><b>打开文件</b>：点“打开 HTML 文件”，在手机的“文件”中选择 .html 或 .htm。</li><li><b>粘贴代码</b>：把 HTML 粘贴到编辑器，点“预览”查看。支持 CSS、JavaScript。</li><li><b>大屏查看</b>：点“全屏”隐藏编辑器；右上角 ↗ 可在新标签页打开。</li><li><b>保存文件</b>：点“下载 HTML”，可把编辑后的文件保存到设备。</li></ol><p>文件内容不会由本工具上传。HTML 在隔离的预览框内运行；代码引用的外部图片、字体或脚本仍可能联网。</p><p>引用同目录的图片、CSS 或 JS 时，需要把它们内嵌进 HTML，或改成可访问的网络地址。浏览器不会自动读取旁边的文件。新标签页预览是临时的，不是可分享的网页网址。</p><p>“记住草稿”仅保存在当前浏览器；关闭该选项会移除保存的草稿。手机可通过浏览器的分享菜单添加本工具到主屏幕。</p></dialog>
 <script>
+const uiStrings = {"HTML Pocket · 随身 HTML 查看器": "HTML Pocket · Your HTML Viewer", "随身 HTML 查看器": "Your portable HTML viewer", "HTML Pocket 首页": "HTML Pocket home", "文件在浏览器内处理": "Files stay in your browser", "使用说明": "Help", "把代码，变成眼前的网页": "Bring your HTML to life", "。": ".", "打开本地文件，或粘贴一段 HTML。手机上也能轻松查看。": "Open a local file or paste your HTML. Preview it anywhere, even on your phone.", "打开 HTML 文件": "Open HTML file", "未命名.html": "Untitled.html", "已编辑": "Edited", "载入示例": "Load example", "下载 HTML": "Download HTML", "工作区视图": "Workspace view", "</> 代码": "</> Code", "◉ 预览": "◉ Preview", "HTML 编辑器": "HTML editor", "粘贴": "Paste", "复制": "Copy", "清空": "Clear", "HTML 代码": "HTML code", "松开，打开这个 HTML 文件": "Drop to open this HTML file", "在此设备记住草稿": "Remember draft on this device", "预览": "Preview", "预览宽度": "Preview width", "自适应宽度": "Responsive width", "手机宽度": "Phone width", "重新运行 HTML": "Run HTML again", "刷新": "Refresh", "全屏查看": "Fullscreen preview", "全屏": "Fullscreen", "等待载入 HTML": "Waiting for HTML", "在新标签页打开预览": "Open preview in a new tab", "新标签页打开": "Open in new tab", "你的网页，即将在这里出现": "Your webpage starts here", "打开一个 HTML 文件，或在左侧粘贴代码。": "Open an HTML file or paste code into the editor.", "试试一个小示例": "Try a little example", "HTML 网页预览": "HTML webpage preview", "自动预览": "Auto preview", "运行预览": "Run preview", "退出全屏 ×": "Exit fullscreen ×", "单文件 HTML 效果最佳，支持内嵌 CSS 和 JavaScript。": "Works best with single-file HTML, including inline CSS and JavaScript.", "随时打开你的灵感": "A little space for your ideas", "口袋里的网页查看器": "A webpage viewer in your pocket", "关闭使用说明": "Close help", "打开文件": "Open a file", "：点“打开 HTML 文件”，在手机的“文件”中选择 .html 或 .htm。": ": Choose Open HTML file, then select an .html or .htm file from your device.", "粘贴代码": "Paste code", "：把 HTML 粘贴到编辑器，点“预览”查看。支持 CSS、JavaScript。": ": Paste HTML into the editor and select Preview. CSS and JavaScript are supported.", "大屏查看": "Get a bigger view", "：点“全屏”隐藏编辑器；右上角 ↗ 可在新标签页打开。": ": Use Fullscreen to hide the editor, or select ↗ to open a new tab.", "保存文件": "Save a file", "：点“下载 HTML”，可把编辑后的文件保存到设备。": ": Choose Download HTML to save your edited file to your device.", "文件内容不会由本工具上传。HTML 在隔离的预览框内运行；代码引用的外部图片、字体或脚本仍可能联网。": "This tool does not upload your file contents. HTML runs in an isolated frame. External images, fonts, or scripts referenced by your code may still connect to the internet.", "引用同目录的图片、CSS 或 JS 时，需要把它们内嵌进 HTML，或改成可访问的网络地址。浏览器不会自动读取旁边的文件。新标签页预览是临时的，不是可分享的网页网址。": "Images, CSS, and JS from nearby files must be embedded in your HTML or use accessible web URLs. The browser cannot automatically read neighboring files. A new-tab preview is temporary, not a shareable website URL.", "“记住草稿”仅保存在当前浏览器；关闭该选项会移除保存的草稿。手机可通过浏览器的分享菜单添加本工具到主屏幕。": "Remember draft saves only in this browser. Turning it off removes the saved draft. On your phone, use your browser's share menu to add this tool to your home screen.", "在手机或电脑上打开 HTML 文件、粘贴代码并即时预览。文件内容在当前浏览器内处理。": "Open HTML files or paste code for instant previews on your phone or computer. File contents are processed in your browser.", "浏览器无法保存草稿；仍可正常查看和下载文件。": "Draft storage is unavailable. You can still preview and download your HTML.", "这会替换当前代码。需要保留的话，请先取消并下载 HTML。继续替换？": "Replace the current code? To keep it, cancel and download your HTML first.", "请选择 .html 或 .htm 文件。": "Please select an .html or .htm file.", "文件超过 20 MB，请精简后再打开。": "This file is over 20 MB. Please reduce its size and try again.", "无法读取文件，请重新选择。": "Could not read the file. Please select it again.", "请先打开文件或粘贴 HTML。": "Open a file or paste HTML first.", "浏览器拦截了新标签页，请允许弹出窗口，或使用“全屏”。": "Your browser blocked the new tab. Allow popups or use Fullscreen.", "新标签页未能打开，请使用“全屏”查看。": "Could not open a new tab. Please use Fullscreen.", "草稿将保存在当前浏览器中。": "Your draft will be saved in this browser.", "已关闭草稿记忆并移除保存的内容。": "Draft memory is off and the saved draft has been removed.", "清空当前 HTML？需要保留的话，请先取消并下载。": "Clear the current HTML? To keep it, cancel and download it first.", "请在编辑区长按，选择“粘贴”。": "Press and hold in the editor, then choose Paste.", "剪贴板没有文字，请复制 HTML 后再试。": "Your clipboard has no text. Copy some HTML and try again.", "HTML 代码已复制。": "HTML code copied.", "已选中代码，请使用系统的复制命令。": "Code selected. Use your device's Copy command.", "好天气.html": "A-little-sunshine.html", "粘贴的网页.html": "Pasted-page.html", "浏览器本地预览": "Local browser preview"};
+
+const reverseUiStrings = Object.fromEntries(Object.entries(uiStrings).map(([zh,en]) => [en,zh]));
+function tr(zh) { return currentLanguage === 'en' ? (uiStrings[zh] || zh) : zh; }
+function translateValue(value) { return tr(reverseUiStrings[value] || value); }
+function savePreference(key,value) { try { localStorage.setItem(key,value); } catch {} }
+function applyLanguage() {
+  document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'zh-CN';
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    if (node.parentElement.closest('script,style,textarea,#fileName,#codeStats,#previewAddress,#toast,.appearance-controls')) continue;
+    const original = node.nodeValue.trim();
+    if (uiStrings[original] || reverseUiStrings[original]) node.nodeValue = node.nodeValue.replace(original,translateValue(original));
+  }
+  document.querySelectorAll('[title],[aria-label],meta[name="description"]').forEach(node => {
+    if (node.closest('.appearance-controls')) return;
+    for (const attr of ['title','aria-label','content']) {
+      const value = node.getAttribute(attr);
+      if (value && (uiStrings[value] || reverseUiStrings[value])) node.setAttribute(attr,translateValue(value));
+    }
+  });
+  document.title = tr('HTML Pocket · 随身 HTML 查看器');
+  const button = document.getElementById('languageButton');
+  button.textContent = currentLanguage === 'en' ? '中文' : 'EN';
+  button.title = button.ariaLabel = currentLanguage === 'en' ? '切换到中文' : 'Switch to English';
+  document.getElementById('editor').placeholder = currentLanguage === 'en'
+    ? '<!DOCTYPE html>\n<html lang="en">\n  <body>\n    <h1>Hello, world.</h1>\n  </body>\n</html>\n\nPaste HTML here, or open a file…'
+    : '<!DOCTYPE html>\n<html lang="zh-CN">\n  <body>\n    <h1>你好，世界。</h1>\n  </body>\n</html>\n\n在这里粘贴 HTML，或打开一个文件…';
+  for (const original of ['未命名.html','粘贴的网页.html','好天气.html']) {
+    if (fileName === original || fileName === uiStrings[original]) { fileName = tr(original); document.getElementById('fileName').textContent = fileName; break; }
+  }
+  stats();
+  document.getElementById('previewAddress').textContent = editor.value.trim() ? fileName + ' · ' + tr('浏览器本地预览') : tr('等待载入 HTML');
+  const toastEl = document.getElementById('toast');
+  if (!toastEl.hidden) toastEl.textContent = translateValue(toastEl.textContent);
+  applyTheme();
+}
+function applyTheme() {
+  document.documentElement.dataset.theme = currentTheme;
+  const dark = currentTheme === 'dark';
+  const button = document.getElementById('themeButton');
+  button.textContent = dark ? '☀' : '☾';
+  button.setAttribute('aria-pressed',String(dark));
+  const label = currentLanguage === 'en' ? (dark ? 'Switch to light mode' : 'Switch to dark mode') : (dark ? '切换到浅色模式' : '切换到深色模式');
+  button.title = button.ariaLabel = label;
+  document.querySelector('meta[name="theme-color"]').content = dark ? '#141c19' : '#f5f6f2';
+}
+document.addEventListener('DOMContentLoaded',() => {
+  document.getElementById('languageButton').addEventListener('click',() => {
+    currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+    savePreference('html-pocket.language',currentLanguage);
+    applyLanguage();
+  });
+  document.getElementById('themeButton').addEventListener('click',() => {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    savePreference('html-pocket.theme',currentTheme);
+    applyTheme();
+  });
+  applyLanguage();
+});
+
 'use strict';
 const $ = id => document.getElementById(id);
 const editor = $('editor');
@@ -324,7 +142,7 @@ const frame = $('previewFrame');
 const workspace = $('workspace');
 const sandbox = 'allow-scripts allow-forms allow-modals allow-popups allow-downloads';
 const draftKey = 'html-pocket.draft.v1';
-let fileName = '未命名.html';
+let fileName = tr("未命名.html");
 let renderTimer;
 let toastTimer;
 let pendingSource = '';
@@ -382,13 +200,13 @@ function persistDraft() {
     if ($('rememberDraft').checked) {
       localStorage.setItem(draftKey, JSON.stringify({ code: editor.value, name: fileName }));
     } else localStorage.removeItem(draftKey);
-  } catch { toast('浏览器无法保存草稿；仍可正常查看和下载文件。'); }
+  } catch { toast(tr("浏览器无法保存草稿；仍可正常查看和下载文件。")); }
 }
 
 function stats() {
   const code = editor.value;
   const count = code ? code.split('\n').length : 0;
-  $('codeStats').textContent = `${count.toLocaleString()} 行 · ${code.length.toLocaleString()} 字符`;
+  $('codeStats').textContent = currentLanguage === 'en' ? `${count.toLocaleString()} lines · ${code.length.toLocaleString()} characters` : `${count.toLocaleString()} 行 · ${code.length.toLocaleString()} 字符`;
   // Keep line numbering responsive for large documents.
   $('lineNumbers').textContent = Array.from({ length: Math.min(count || 1, 15000) }, (_, i) => i + 1).join('\n');
   $('lineNumbers').scrollTop = editor.scrollTop;
@@ -407,14 +225,14 @@ function render(force = false) {
     frame.src = 'about:blank';
     frame.hidden = true;
     $('emptyState').hidden = false;
-    $('previewAddress').textContent = '等待载入 HTML';
+    $('previewAddress').textContent = tr("等待载入 HTML");
     return;
   }
   frame.hidden = false;
   $('emptyState').hidden = true;
   frame.removeAttribute('src');
   frame.srcdoc = code;
-  $('previewAddress').textContent = `${fileName} · 浏览器本地预览`;
+  $('previewAddress').textContent = `${fileName} · ${tr('浏览器本地预览')}`;
 }
 
 function update({ modified = true, immediate = false } = {}) {
@@ -437,16 +255,16 @@ function setDocument(code, name, showPreview = true) {
 
 function replaceDocument(code, name) {
   // Browser confirmation is used only when replacing an unsaved, nonempty document.
-  if (editor.value.trim() && editor.value !== code && !confirm('这会替换当前代码。需要保留的话，请先取消并下载 HTML。继续替换？')) return;
+  if (editor.value.trim() && editor.value !== code && !confirm(tr("这会替换当前代码。需要保留的话，请先取消并下载 HTML。继续替换？"))) return;
   setDocument(code, name);
 }
 
 async function openFile(file) {
   if (!file) return;
   if (!/\.html?$/i.test(file.name) && file.type !== 'text/html') {
-    toast('请选择 .html 或 .htm 文件。'); return;
+    toast(tr("请选择 .html 或 .htm 文件。")); return;
   }
-  if (file.size > 20 * 1024 * 1024) { toast('文件超过 20 MB，请精简后再打开。'); return; }
+  if (file.size > 20 * 1024 * 1024) { toast(tr("文件超过 20 MB，请精简后再打开。")); return; }
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
     let code;
@@ -459,27 +277,28 @@ async function openFile(file) {
       catch { code = new TextDecoder('utf-8').decode(bytes); }
     }
     replaceDocument(code, file.name);
-  } catch { toast('无法读取文件，请重新选择。'); }
+  } catch { toast(tr("无法读取文件，请重新选择。")); }
 }
 
 function newTab() {
-  if (!editor.value.trim()) { toast('请先打开文件或粘贴 HTML。'); return; }
+  if (!editor.value.trim()) { toast(tr("请先打开文件或粘贴 HTML。")); return; }
   // Open synchronously in the user gesture so mobile Safari can allow the tab.
   const tab = window.open('about:blank', '_blank');
-  if (!tab) { toast('浏览器拦截了新标签页，请允许弹出窗口，或使用“全屏”。'); return; }
+  if (!tab) { toast(tr("浏览器拦截了新标签页，请允许弹出窗口，或使用“全屏”。")); return; }
   try {
     tab.opener = null;
     tab.document.open();
     tab.document.write('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HTML 预览</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}iframe{border:0;width:100%;height:100%;display:block;background:white}</style></head><body></body></html>');
     tab.document.close();
+    tab.document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'zh-CN';
     const child = tab.document.createElement('iframe');
-    child.title = 'HTML 网页预览';
+    child.title = tr("HTML 网页预览");
     child.setAttribute('sandbox', sandbox);
     child.referrerPolicy = 'no-referrer';
     child.srcdoc = editor.value;
-    tab.document.title = fileName + ' · 预览';
+    tab.document.title = fileName + ' · ' + tr('预览');
     tab.document.body.appendChild(child);
-  } catch { tab.close(); toast('新标签页未能打开，请使用“全屏”查看。'); }
+  } catch { tab.close(); toast(tr("新标签页未能打开，请使用“全屏”查看。")); }
 }
 
 function setFullscreen(on) {
@@ -508,28 +327,28 @@ editor.addEventListener('keydown', event => {
 $('runButton').addEventListener('click', () => { render(true); setView('preview'); });
 $('refreshButton').addEventListener('click', () => render(true));
 $('autoPreview').addEventListener('change', () => { clearTimeout(renderTimer); if ($('autoPreview').checked) render(true); });
-$('rememberDraft').addEventListener('change', () => { persistDraft(); toast($('rememberDraft').checked ? '草稿将保存在当前浏览器中。' : '已关闭草稿记忆并移除保存的内容。'); });
+$('rememberDraft').addEventListener('change', () => { persistDraft(); toast($('rememberDraft').checked ? tr("草稿将保存在当前浏览器中。") : tr("已关闭草稿记忆并移除保存的内容。")); });
 $('codeTab').addEventListener('click', () => setView('code'));
 $('previewTab').addEventListener('click', () => { render(); setView('preview'); });
 for (const id of ['codeTab', 'previewTab']) $(id).addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { const next = id === 'codeTab' ? 'previewTab' : 'codeTab'; $(next).focus(); $(next).click(); e.preventDefault(); }
 });
-for (const id of ['exampleButton', 'emptyExampleButton']) $(id).addEventListener('click', () => replaceDocument(example, '好天气.html'));
+for (const id of ['exampleButton', 'emptyExampleButton']) $(id).addEventListener('click', () => replaceDocument(example, tr("好天气.html")));
 $('clearButton').addEventListener('click', () => {
-  if (editor.value && !confirm('清空当前 HTML？需要保留的话，请先取消并下载。')) return;
-  setDocument('', '未命名.html', false); setView('code'); editor.focus();
+  if (editor.value && !confirm(tr("清空当前 HTML？需要保留的话，请先取消并下载。"))) return;
+  setDocument('', tr("未命名.html"), false); setView('code'); editor.focus();
 });
 $('pasteButton').addEventListener('click', async () => {
-  if (!navigator.clipboard?.readText) { setView('code'); editor.focus(); toast('请在编辑区长按，选择“粘贴”。'); return; }
+  if (!navigator.clipboard?.readText) { setView('code'); editor.focus(); toast(tr("请在编辑区长按，选择“粘贴”。")); return; }
   try {
     const text = await navigator.clipboard.readText();
-    if (!text.trim()) { toast('剪贴板没有文字，请复制 HTML 后再试。'); return; }
-    replaceDocument(text, '粘贴的网页.html');
-  } catch { setView('code'); editor.focus(); toast('请在编辑区长按，选择“粘贴”。'); }
+    if (!text.trim()) { toast(tr("剪贴板没有文字，请复制 HTML 后再试。")); return; }
+    replaceDocument(text, tr("粘贴的网页.html"));
+  } catch { setView('code'); editor.focus(); toast(tr("请在编辑区长按，选择“粘贴”。")); }
 });
 $('copyButton').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(editor.value); toast('HTML 代码已复制。'); }
-  catch { setView('code'); editor.focus(); editor.select(); toast('已选中代码，请使用系统的复制命令。'); }
+  try { await navigator.clipboard.writeText(editor.value); toast(tr("HTML 代码已复制。")); }
+  catch { setView('code'); editor.focus(); editor.select(); toast(tr("已选中代码，请使用系统的复制命令。")); }
 });
 $('downloadButton').addEventListener('click', () => {
   const blob = new Blob([editor.value], { type: 'text/html;charset=utf-8' });
