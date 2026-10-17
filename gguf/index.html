@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f8f8f8">
+  <meta name="description" content="MONO GGUF Studio — private, browser-local GGUF inference with WebGPU and WebAssembly. 本地模型，纯前端运行。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; connect-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>MONO · GGUF Studio</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./bootstrap.js" defer></script>
+  <script src="./vendor/highlight.js" defer></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+<svg class="symbol-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+ <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+ <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></symbol>
+ <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5M8 13h8m-8 4h5"/></symbol>
+ <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/><path d="M10 10h4v4h-4z"/></symbol>
+ <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h5m4 0h7M4 17h9m4 0h3"/><circle cx="11" cy="7" r="2"/><circle cx="15" cy="17" r="2"/></symbol>
+ <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+ <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></symbol>
+ <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v2m0 18v2M1 12h2m18 0h2M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></symbol>
+ <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+ <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+ <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/></symbol>
+ <symbol id="i-retry" viewBox="0 0 24 24"><path d="M4 11a8 8 0 1 1 2 7M4 4v7h7"/></symbol>
+ <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></symbol>
+</defs></svg>
+<header class="topbar">
+ <a class="brand" href="./" aria-label="MONO home"><span class="brand-mark">m<span>·</span></span><span>MONO<small>GGUF STUDIO</small></span></a>
+ <div class="top-status"><span class="status-dot"></span><span data-i18n="browserLocal">浏览器本地运行</span></div>
+ <div class="top-actions">
+  <button id="hardwareBtn" class="icon-btn hardware-btn" data-title="hardware"><svg><use href="#i-chip"/></svg><span data-i18n="hardware">设备</span></button>
+  <button id="languageBtn" class="text-btn" aria-label="Switch language / 切换语言">EN</button>
+  <button id="themeBtn" class="icon-btn" data-title="theme"><svg><use href="#i-sun"/></svg></button>
+  <button id="helpBtn" class="icon-btn help-btn" data-title="help">?</button>
+ </div>
+</header>
+<div class="workspace">
+ <aside id="sidebar" class="sidebar" aria-label="Model settings">
+  <div class="sidebar-top"><span class="eyebrow" data-i18n="workspace">工作空间</span><button id="closeSidebar" class="icon-btn mobile-only" data-title="close"><svg><use href="#i-close"/></svg></button></div>
+  <button id="newChatBtn" class="new-chat"><svg><use href="#i-plus"/></svg><span data-i18n="newChat">新对话</span><kbd>⌘ / Ctrl K</kbd></button>
+  <div class="section-head"><h2 data-i18n="localModel">本地模型</h2><span class="mini-label">.GGUF</span></div>
+  <button id="dropzone" class="dropzone"><span class="upload-icon"><svg><use href="#i-file"/></svg><span>+</span></span><strong data-i18n="chooseModel">选择 GGUF 文件</strong><span data-i18n="dropHint">或拖放文件到这里 · 支持多分片</span></button>
+  <input id="modelFiles" type="file" accept=".gguf" multiple hidden>
+  <div id="fileList" class="file-list" hidden></div>
+  <p class="privacy-hint"><svg><use href="#i-lock"/></svg><span data-i18n="fileLocal">文件留在当前设备，不会上传</span></p>
+  <div id="modelInfo" class="model-info" hidden></div>
+  <div id="loadProgress" class="load-progress" hidden><progress></progress><span id="loadStage" role="status"></span></div>
+  <button id="loadBtn" class="primary wide" disabled data-i18n="loadModel">加载模型</button>
+  <button id="unloadBtn" class="subtle wide" hidden data-i18n="unload">卸载模型 · 释放资源</button>
+  <div class="section-head"><h2 data-i18n="inference">推理设置</h2><svg><use href="#i-sliders"/></svg></div>
+  <fieldset id="loadSettings">
+   <label class="field"><span data-i18n="backend">计算后端</span><select id="backend"><option value="auto" data-i18n="autoGPU">自动 · 优先 WebGPU</option><option value="gpu">WebGPU</option><option value="cpu" data-i18n="cpu">CPU · WebAssembly</option></select></label>
+   <div class="field-grid"><label class="field"><span data-i18n="context">上下文长度</span><input id="context" type="number" min="1" step="1" value="4096"></label><label class="field"><span data-i18n="threads">CPU 线程</span><input id="threads" type="number" min="1" step="1" value="4"></label></div>
+   <label class="field"><span data-i18n="gpuLayers">GPU 层数（-1 = 全部）</span><input id="gpuLayers" type="number" min="-1" step="1" value="-1"></label>
+  </fieldset>
+  <p class="micro" data-i18n="reloadHint">后端和上下文更改需卸载后重新加载。</p>
+  <details class="settings-details"><summary data-i18n="generation">生成参数</summary>
+   <div class="field-grid"><label class="field"><span>Temperature</span><input id="temperature" type="number" min="0" step="0.05" value="0.7"></label><label class="field"><span>Top P</span><input id="topP" type="number" min="0" max="1" step="0.05" value="0.9"></label></div>
+   <div class="field-grid"><label class="field"><span>Top K</span><input id="topK" type="number" min="0" step="1" value="40"></label><label class="field"><span>Min P</span><input id="minP" type="number" min="0" max="1" step="0.01" value="0.05"></label></div>
+   <label class="field"><span data-i18n="maxTokens">输出 token（-1 = 直到结束）</span><input id="maxTokens" type="number" min="-1" step="1" value="2048"></label>
+   <div class="field-grid"><label class="field"><span data-i18n="repeatPenalty">重复惩罚</span><input id="repeatPenalty" type="number" min="0" step="0.05" value="1.1"></label><label class="field"><span data-i18n="seed">随机种子（-1 = 随机）</span><input id="seed" type="number" min="-1" step="1" value="-1"></label></div>
+   <label class="field"><span data-i18n="format">输出格式</span><select id="outputFormat"><option value="text" data-i18n="markdown">Markdown / 文本</option><option value="json_object">JSON</option></select></label>
+   <label class="switch-label"><input id="thinking" type="checkbox" checked><span data-i18n="thinkingToggle">启用模型思考（模型支持时）</span></label>
+   <label class="field"><span data-i18n="systemPrompt">系统提示词</span><textarea id="systemPrompt" rows="4" data-placeholder="systemPlaceholder" placeholder="设置模型的角色、语气或规则…"></textarea></label>
+  </details>
+  <details class="settings-details"><summary data-i18n="advanced">高级加载设置</summary>
+   <fieldset id="advancedLoadSettings"><div class="field-grid"><label class="field"><span>Batch</span><input id="batch" type="number" min="1" value="512"></label><label class="field"><span>Micro batch</span><input id="microBatch" type="number" min="1" value="128"></label></div>
+   <label class="field"><span data-i18n="template">聊天模板</span><select id="chatTemplate"><option value="" data-i18n="modelTemplate">使用 GGUF 内置模板</option><option value="chatml">ChatML</option><option value="llama3">Llama 3</option><option value="gemma">Gemma</option></select></label></fieldset>
+   <p class="micro" data-i18n="templateHint">仅在模型缺少或无法识别内置模板时手动选择。</p>
+  </details>
+  <button id="historyBtn" class="sidebar-link"><svg><use href="#i-clock"/></svg><span data-i18n="history">对话记录</span><span id="historyCount" class="count">0</span></button>
+  <div class="sidebar-footer"><span class="tiny-orbit">◉</span><div><b id="miniBackend">—</b><small id="miniHardware" data-i18n="detecting">正在检测设备…</small></div><span class="status-dot"></span></div>
+ </aside>
+ <main class="chat-area">
+  <div class="chat-toolbar"><div><button id="sidebarBtn" class="icon-btn mobile-only" data-title="settings"><svg><use href="#i-sliders"/></svg></button><span id="chatTitle" data-i18n="untitled">未命名对话</span><span id="enginePill" class="pill" data-i18n="notLoaded">尚未加载</span></div><button id="exportBtn" class="icon-btn" data-title="export"><svg><use href="#i-download"/></svg></button></div>
+  <div id="chatScroll" class="chat-scroll">
+   <section id="welcome" class="welcome">
+    <div class="hero-glyph" aria-hidden="true"><div></div><span>m<span>·</span></span><i></i><i></i><i></i><i></i></div>
+    <span class="eyebrow">YOUR MODEL. YOUR MACHINE.</span>
+    <h1 data-i18n="hero">让模型，留在你手边。</h1>
+    <p data-i18n="heroSubtitle">载入自己的 GGUF，开始一场只属于这台设备的对话。</p>
+    <button id="heroChooseBtn" class="primary"><svg><use href="#i-plus"/></svg><span data-i18n="chooseModel">选择 GGUF 文件</span></button>
+    <div class="feature-line"><span>GGUF</span><i></i><span>WebGPU</span><i></i><span>WebAssembly</span></div>
+    <div class="welcome-notes"><div><span>01</span><h3 data-i18n="noCap">不按参数量设限</h3><p data-i18n="noCapText">由模型支持、设备和浏览器的实际能力决定。</p></div><div><span>02</span><h3 data-i18n="richOutput">表达，不止纯文本</h3><p data-i18n="richOutputText">代码、表格、粗体、引用，清晰呈现。</p></div><div><span>03</span><h3 data-i18n="allLocal">本地计算</h3><p data-i18n="allLocalText">模型与对话不发送到推理服务器。</p></div></div>
+   </section>
+   <div id="messages" class="messages" role="log" aria-label="Chat messages"></div>
+  </div>
+  <div id="notice" class="notice" role="alert" hidden><span id="noticeText"></span><button id="dismissNotice" class="icon-btn" data-title="close"><svg><use href="#i-close"/></svg></button></div>
+  <div class="composer-wrap">
+   <div id="runMetrics" class="run-metrics"><span id="runState" data-i18n="waiting">等待加载本地模型</span><span id="speedMetric">— tok/s</span><span id="tokenMetric">— tokens</span><span id="timeMetric">— s</span></div>
+   <form id="composer" class="composer"><textarea id="prompt" rows="1" data-placeholder="promptPlaceholder" placeholder="加载模型后，在这里开始对话…" aria-label="Message / 消息"></textarea><div class="composer-bottom"><span><svg><use href="#i-lock"/></svg><span data-i18n="localOnly">仅在此设备处理</span></span><button id="sendBtn" class="send-btn" type="submit" disabled data-title="send"><svg><use href="#i-arrow"/></svg></button><button id="stopBtn" class="send-btn" type="button" hidden data-title="stop"><svg><use href="#i-stop"/></svg></button></div></form>
+   <p class="composer-foot"><span data-i18n="aiNote">模型可能出错，请核实重要信息。</span><span data-i18n="keyHint">Enter 发送 · Shift + Enter 换行</span></p>
+  </div>
+ </main>
+</div>
+<div id="sidebarShade" class="shade" hidden></div>
+<dialog id="hardwareDialog" class="modal"><div class="modal-head"><div><span class="eyebrow">DEVICE / LIVE</span><h2 data-i18n="hardwareTitle">你的设备，此刻。</h2></div><button class="icon-btn" data-close data-title="close"><svg><use href="#i-close"/></svg></button></div><div class="modal-body">
+ <div class="monitor-hero"><svg><use href="#i-chip"/></svg><div><span data-i18n="gpuAdapter">WebGPU 适配器</span><strong id="gpuName">—</strong><small id="gpuStatus">—</small></div></div>
+ <div class="hardware-grid" id="hardwareGrid"></div>
+ <div class="section-head"><h3 data-i18n="inferenceNow">本次推理</h3><span class="mini-label">LIVE</span></div><div id="inferenceGrid" class="hardware-grid"></div>
+ <div class="honest-note"><strong data-i18n="visibilityTitle">浏览器能看见的，有边界。</strong><p data-i18n="visibilityText">整机 CPU / GPU 利用率、温度、功耗、剩余显存和真实可用内存无法由普通网页可靠读取。这里不会生成模拟数值。JS 堆不含完整模型、WASM 或显存；GPU 缓冲区上限也不是显存容量。</p></div>
+ <details class="logs"><summary data-i18n="logs">引擎日志</summary><pre id="engineLogs"></pre><button id="copyLogs" class="subtle" data-i18n="copyLogs">复制日志</button></details>
+</div></dialog>
+<dialog id="historyDialog" class="modal"><div class="modal-head"><h2 data-i18n="history">对话记录</h2><button class="icon-btn" data-close data-title="close"><svg><use href="#i-close"/></svg></button></div><div class="modal-body"><label class="switch-label"><input id="saveHistory" type="checkbox" checked><span data-i18n="saveHistory">将对话保存在此浏览器</span></label><p class="micro" data-i18n="historyHint">记录保存在当前站点的浏览器存储中。模型文件不会随记录保存。</p><div id="historyList"></div><div class="row-actions"><button id="importBtn" class="subtle" data-i18n="importChat">导入 JSON 对话</button><button id="clearHistoryBtn" class="subtle" data-i18n="clearHistory">清除全部记录</button></div><input id="importFile" type="file" accept=".json" hidden></div></dialog>
+<dialog id="helpDialog" class="modal"><div class="modal-head"><h2 data-i18n="helpTitle">从你的模型开始</h2><button class="icon-btn" data-close data-title="close"><svg><use href="#i-close"/></svg></button></div><div class="modal-body help-content" id="helpContent"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+<noscript><p>请启用 JavaScript。This app requires JavaScript.</p></noscript>
+</body></html>
