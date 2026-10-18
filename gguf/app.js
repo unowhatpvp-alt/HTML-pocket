@@ -1,6 +1,7 @@
 import { marked } from './vendor/marked.js';
 import DOMPurify from './vendor/purify.js';
-import { strings, helpHTML } from './i18n.js';
+import { strings, helpHTML } from './i18n.js?v=20261018-folder';
+import { FolderChatStore } from './folder-storage.js?v=20261018-folder';
 import { ENGINE_VERSION, ENGINE_BASE, PREFS_KEY, HISTORY_KEY, formatBytes, escapeHTML, numeric, inspectFiles, splitReasoning, normalizeImport, extractRuntimeStats } from './core.js';
 
 const $ = id => document.getElementById(id);
@@ -10,6 +11,14 @@ const t = key => strings[lang][key] || key;
 const state = { engine:null, selected:null, model:null, busy:false, inspecting:false, loading:false, generating:false, abort:null, sessions:[], chat:freshChat(), status:'waiting', logs:[], runtime:{gpuLayers:null,buffers:{}}, requestedGPU:false, threadCount:0, loadedContext:0, firstToken:null, tokenCount:null, speed:null, elapsed:0, gpu:null, gpuName:'', lag:0, save:true, renderTimer:null };
 const preferenceIds = ['backend','context','threads','gpuLayers','temperature','topP','topK','minP','maxTokens','repeatPenalty','seed','outputFormat','systemPrompt','batch','microBatch','chatTemplate'];
 let storageWarned = false, toastTimer, wakeLock;
+let folderBusy = false, folderErrorNotified = false;
+const folderStore = new FolderChatStore({ environment: window, onChange: status => {
+  renderFolderStorage();
+  if (['error','permission'].includes(status.phase) && status.name && !folderErrorNotified) {
+    folderErrorNotified = true;
+    notice(t(status.phase === 'permission' ? 'folderPermission' : 'folderFailed'));
+  } else if (['ready','saved','off'].includes(status.phase)) folderErrorNotified = false;
+} });
 function freshChat() { return { id:crypto.randomUUID(), title:'', messages:[], updated:Date.now() }; }
 function toast(message) { $('toast').textContent=message; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true,2800); }
 function notice(message) { $('noticeText').textContent=message; $('notice').hidden=!message; }
@@ -41,10 +50,49 @@ function restore() {
   } catch { /* A corrupt or unavailable preference store must not prevent startup. */ }
 }
 function saveChat() {
-  if(!state.chat.messages.length||!state.save)return;
+  if(!state.chat.messages.length)return;
   state.chat.updated=Date.now();
-  state.sessions=state.sessions.filter(s=>s.id!==state.chat.id);state.sessions.unshift(structuredClone(state.chat));
-  storeJSON(HISTORY_KEY,state.sessions);$('historyCount').textContent=String(state.sessions.length);
+  if(state.save) {
+    state.sessions=state.sessions.filter(s=>s.id!==state.chat.id);state.sessions.unshift(structuredClone(state.chat));
+    storeJSON(HISTORY_KEY,state.sessions);$('historyCount').textContent=String(state.sessions.length);
+  }
+  folderStore.save(state.chat);
+}
+function folderChats() {
+  const chats=new Map(state.sessions.map(chat=>[chat.id,chat]));
+  if(state.chat.messages.length)chats.set(state.chat.id,state.chat);
+  return [...chats.values()];
+}
+function renderFolderStorage() {
+  const status=folderStore.status;
+  const busy=folderBusy||status.phase==='restoring';
+  $('chooseFolderBtn').disabled=busy||!status.supported;
+  $('chooseFolderBtn').textContent=t(status.name?'changeFolder':'chooseFolder');
+  $('resumeFolderBtn').hidden=!status.name||!['permission','error'].includes(status.phase);
+  $('resumeFolderBtn').disabled=busy;
+  $('resumeFolderBtn').textContent=t(status.phase==='error'?'retryFolder':'resumeFolder');
+  $('saveFolderBtn').hidden=!status.name||['permission','error'].includes(status.phase);
+  $('saveFolderBtn').disabled=busy||status.phase==='saving';
+  $('disconnectFolderBtn').hidden=!status.name;$('disconnectFolderBtn').disabled=busy;
+  $('folderLocation').textContent=status.name||t('folderNotChosen');
+  $('folderUnsupported').hidden=status.supported;
+  $('folderRememberWarning').hidden=status.remembered;
+  const labels={off:'folderOff',restoring:'folderRestoring',ready:'folderReady',saving:'folderSaving',saved:'folderSaved',permission:'folderPermission',error:'folderFailed'};
+  $('folderStatus').textContent=t(labels[status.phase])+(status.phase==='saved'&&status.lastSaved?' · '+new Date(status.lastSaved).toLocaleTimeString(lang==='zh'?'zh-CN':'en-US'):'')+(status.error==='FILE_CONFLICT'?' '+t('folderConflict'):status.error==='FILE_NEWER'?' '+t('folderNewer'):'');
+}
+async function folderAction(action) {
+  if(folderBusy)return;
+  folderBusy=true;renderFolderStorage();
+  try {
+    if(action==='disconnect') {
+      if(!await folderStore.disconnect())notice(t('folderForgetFailed'));
+    } else {
+      const ready=action==='choose'?await folderStore.choose():action==='resume'?await folderStore.resume():true;
+      if(ready)await folderStore.save(folderChats());
+    }
+  } catch(error) {
+    if(error.name!=='AbortError')notice(t('folderFailed')+' '+String(error.message||error));
+  } finally {folderBusy=false;renderFolderStorage();}
 }
 function setStatus(key) { state.status=key;$('runState').textContent=t(key); }
 function setControls() {
@@ -70,7 +118,7 @@ function applyLanguage() {
   document.querySelectorAll('[data-placeholder]').forEach(e=>e.placeholder=t(e.dataset.placeholder));
   $('languageBtn').textContent=lang==='zh'?'EN':'中';$('sidebar').setAttribute('aria-label',t('settings'));
   $('helpContent').innerHTML=helpHTML(lang);$('historyCount').textContent=String(state.sessions.length);
-  setStatus(state.status);setControls();renderMessages();renderModelInfo();renderHistory();renderHardware();
+  setStatus(state.status);setControls();renderMessages();renderModelInfo();renderHistory();renderHardware();renderFolderStorage();
 }
 function safeMarkdown(text) {
   return DOMPurify.sanitize(marked.parse(text,{gfm:true,breaks:true}),{
@@ -242,8 +290,10 @@ async function generate(regenerate=false) {
   const answer={id:crypto.randomUUID(),role:'assistant',content:'',reasoning:'',status:'generating'};
   state.chat.messages.push(answer);state.generating=true;state.abort=new AbortController();state.firstToken=null;state.tokenCount=null;state.speed=null;state.elapsed=0;notice('');setStatus('prefill');setControls();renderMessages();
   const started=performance.now();let finishReason=null;
-  $('chatScroll').scrollTop=$('chatScroll').scrollHeight;persistPreferences();await holdAwake();
+  $('chatScroll').scrollTop=$('chatScroll').scrollHeight;persistPreferences();saveChat();await holdAwake();
   const timer=setInterval(()=>{state.elapsed=(performance.now()-started)/1000;renderMetrics();},250);
+  let checkpoint=JSON.stringify([answer.content,answer.reasoning]);
+  const saveTimer=setInterval(()=>{const current=JSON.stringify([answer.content,answer.reasoning]);if(current!==checkpoint){checkpoint=current;saveChat();}},2000);
   try {
     await state.engine.createChatCompletion({...parameters,messages,stream:true,abortSignal:state.abort.signal,onData:chunk=>{
       const choice=chunk.choices?.[0],delta=choice?.delta||{};
@@ -263,7 +313,7 @@ async function generate(regenerate=false) {
     if(state.abort.signal.aborted||error.name==='WllamaAbortError'||/abort/i.test(error.name)){answer.status='stopped';setStatus('stopped');}
     else{answer.status='failed';notice(errorMessage(error));log(error.message);setStatus('failed');}
   }finally{
-    clearInterval(timer);await releaseAwake();state.elapsed=(performance.now()-started)/1000;
+    clearInterval(timer);clearInterval(saveTimer);await releaseAwake();state.elapsed=(performance.now()-started)/1000;
     answer.metrics={tokens:state.tokenCount,seconds:state.elapsed,firstToken:state.firstToken,speed:state.speed};
     state.generating=false;state.abort=null;clearTimeout(state.renderTimer);state.renderTimer=null;
     setControls();renderMessages();renderMetrics();saveChat();renderHardware();
@@ -326,6 +376,8 @@ async function copy(text){try{await navigator.clipboard.writeText(text);toast(t(
 function startNewChat(){if(state.busy)return;saveChat();state.chat=freshChat();notice('');state.elapsed=0;state.speed=null;state.tokenCount=null;state.firstToken=null;renderMessages();renderMetrics();setStatus(state.model?'ready':'waiting');$('prompt').focus();closeSidebar();}
 
 restore();applyLanguage();renderMetrics();
+// Restore access without replaying potentially stale browser history over disk files.
+folderStore.restore();
 const hardwareReady=detectHardware();
 $('modelFiles').addEventListener('change',e=>selectFiles(e.target.files));
 for(const id of ['dropzone','heroChooseBtn'])$(id).addEventListener('click',async()=>{await (window.monoIsolationReady||Promise.resolve());$('modelFiles').click();});
@@ -348,6 +400,7 @@ $('dismissNotice').addEventListener('click',()=>notice(''));$('newChatBtn').addE
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();startNewChat();}if(e.key==='Escape')closeSidebar();});
 preferenceIds.forEach(id=>$(id).addEventListener('change',persistPreferences));$('thinking').addEventListener('change',persistPreferences);
 $('saveHistory').addEventListener('change',()=>{persistPreferences();if(state.save)saveChat();else toast(t('saveOff'));});
+for(const [id,action] of [['chooseFolderBtn','choose'],['resumeFolderBtn','resume'],['saveFolderBtn','save'],['disconnectFolderBtn','disconnect']])$(id).addEventListener('click',()=>folderAction(action));
 $('messages').addEventListener('click',e=>{
   const button=e.target.closest('button');if(!button)return;
   if(button.hasAttribute('data-regenerate'))return generate(true);
@@ -365,6 +418,10 @@ $('historyList').addEventListener('click',e=>{
 });
 $('clearHistoryBtn').addEventListener('click',()=>{if(state.busy||!confirm(t('confirmClear')))return;state.sessions=[];state.chat=freshChat();storeJSON(HISTORY_KEY,[]);renderHistory();renderMessages();$('historyCount').textContent='0';});
 $('importBtn').addEventListener('click',()=>$('importFile').click());
+$('downloadJSONBtn').addEventListener('click',()=>{
+  if(!state.chat.messages.length){toast(t('emptyExport'));return;}
+  download(JSON.stringify({version:1,title:state.chat.title,messages:state.chat.messages},null,2),`mono-chat-${new Date().toISOString().slice(0,10)}.json`,'application/json');
+});
 $('importFile').addEventListener('change',async e=>{try{const file=e.target.files[0];if(!file)return;const next=normalizeImport(JSON.parse(await file.text()));saveChat();state.chat=next;saveChat();renderMessages();renderHistory();$('historyDialog').close();}catch{notice(t('importInvalid'));}finally{$('importFile').value='';}});
 $('exportBtn').addEventListener('click',()=>{
   if(!state.chat.messages.length){toast(t('emptyExport'));return;}
@@ -378,4 +435,5 @@ $('helpBtn').addEventListener('click',()=>{$('helpContent').innerHTML=helpHTML(l
 let tick=performance.now();
 setInterval(()=>{const now=performance.now();state.lag=document.hidden?0:Math.max(0,now-tick-1000);tick=now;if($('hardwareDialog').open)renderHardware();},1000);
 window.addEventListener('pagehide',()=>{saveChat();state.abort?.abort();});
-document.addEventListener('visibilitychange',()=>{tick=performance.now();if(!document.hidden&&state.generating)holdAwake();});
+window.addEventListener('beforeunload',e=>{if(folderStore.isWriting){e.preventDefault();e.returnValue='';}});
+document.addEventListener('visibilitychange',()=>{tick=performance.now();if(document.hidden)saveChat();if(!document.hidden&&state.generating)holdAwake();});

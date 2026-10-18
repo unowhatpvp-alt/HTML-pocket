@@ -10,3 +10,5 @@
 
 /* Model controls scroll within their panel instead of shrinking to fit. */
 .sidebar>*{flex-shrink:0}
+
+#folderLocation{font-size:12px;overflow-wrap:anywhere;padding:9px 10px;border:1px solid var(--line);border-radius:7px;background:var(--bg)}#folderTitle{font-size:12px}#folderTitle+span{flex-shrink:0}section[aria-labelledby="folderTitle"]>.field{margin-top:14px}#folderStatus{margin:10px 0}#folderUnsupported,#folderRememberWarning{margin-bottom:10px}

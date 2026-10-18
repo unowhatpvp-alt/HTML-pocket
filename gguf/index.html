@@ -9,10 +9,10 @@
   <meta name="referrer" content="no-referrer">
   <title>MONO · GGUF Studio</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=20261018-scroll">
+  <link rel="stylesheet" href="./style.css?v=20261018-folder">
   <script src="./bootstrap.js?v=20261018-scroll" defer></script>
   <script src="./vendor/highlight.js" defer></script>
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=20261018-folder"></script>
 </head>
 <body>
 <svg class="symbol-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -107,7 +107,16 @@
  <div class="honest-note"><strong data-i18n="visibilityTitle">浏览器能看见的，有边界。</strong><p data-i18n="visibilityText">整机 CPU / GPU 利用率、温度、功耗、剩余显存和真实可用内存无法由普通网页可靠读取。这里不会生成模拟数值。JS 堆不含完整模型、WASM 或显存；GPU 缓冲区上限也不是显存容量。</p></div>
  <details class="logs"><summary data-i18n="logs">引擎日志</summary><pre id="engineLogs"></pre><button id="copyLogs" class="subtle" data-i18n="copyLogs">复制日志</button></details>
 </div></dialog>
-<dialog id="historyDialog" class="modal"><div class="modal-head"><h2 data-i18n="history">对话记录</h2><button class="icon-btn" data-close data-title="close"><svg><use href="#i-close"/></svg></button></div><div class="modal-body"><label class="switch-label"><input id="saveHistory" type="checkbox" checked><span data-i18n="saveHistory">将对话保存在此浏览器</span></label><p class="micro" data-i18n="historyHint">记录保存在当前站点的浏览器存储中。模型文件不会随记录保存。</p><div id="historyList"></div><div class="row-actions"><button id="importBtn" class="subtle" data-i18n="importChat">导入 JSON 对话</button><button id="clearHistoryBtn" class="subtle" data-i18n="clearHistory">清除全部记录</button></div><input id="importFile" type="file" accept=".json" hidden></div></dialog>
+<dialog id="historyDialog" class="modal"><div class="modal-head"><h2 data-i18n="history">对话记录</h2><button class="icon-btn" data-close data-title="close"><svg><use href="#i-close"/></svg></button></div><div class="modal-body"><label class="switch-label"><input id="saveHistory" type="checkbox" checked><span data-i18n="saveHistory">将对话保存在此浏览器</span></label><p class="micro" data-i18n="historyHint">记录保存在当前站点的浏览器存储中。模型文件不会随记录保存。</p><section aria-labelledby="folderTitle">
+<div class="section-head"><h3 id="folderTitle" data-i18n="folderTitle">聊天记录保存位置</h3><span class="mini-label">JSON</span></div>
+<p class="micro" data-i18n="folderHint">选择后将保存现有对话，并自动更新聊天记录；每段对话一个 JSON 文件。此设置独立于浏览器保存开关。</p>
+<label class="field"><span data-i18n="folderLocationLabel">所选文件夹</span><output id="folderLocation"></output></label>
+<div class="row-actions"><button id="chooseFolderBtn" class="subtle" data-i18n="chooseFolder">选择文件夹</button><button id="resumeFolderBtn" class="subtle" hidden data-i18n="resumeFolder">恢复访问</button><button id="saveFolderBtn" class="subtle" hidden data-i18n="saveFolderNow">立即保存全部</button><button id="disconnectFolderBtn" class="subtle" hidden data-i18n="disconnectFolder">停止文件夹保存</button><button id="downloadJSONBtn" class="subtle" data-i18n="downloadCurrentJSON">下载当前 JSON</button></div>
+<p id="folderStatus" class="micro" role="status" aria-live="polite"></p>
+<p id="folderUnsupported" class="micro" data-i18n="folderUnsupported" hidden>此浏览器不支持直接选择文件夹。可下载 JSON，由浏览器处理保存位置；电脑可尝试 Chrome 或 Edge。</p>
+<p id="folderRememberWarning" class="micro" data-i18n="folderRememberWarning" hidden>无法记住所选文件夹，下次打开网页请重新选择。</p>
+<p class="micro" data-i18n="folderKeepHint">清除浏览器记录或停止保存，不会删除文件夹中的 JSON。模型文件不会写入。关闭页面前请等候“已保存”。</p>
+</section><div id="historyList"></div><div class="row-actions"><button id="importBtn" class="subtle" data-i18n="importChat">导入 JSON 对话</button><button id="clearHistoryBtn" class="subtle" data-i18n="clearHistory">清除全部记录</button></div><input id="importFile" type="file" accept=".json" hidden></div></dialog>
 <dialog id="helpDialog" class="modal"><div class="modal-head"><h2 data-i18n="helpTitle">从你的模型开始</h2><button class="icon-btn" data-close data-title="close"><svg><use href="#i-close"/></svg></button></div><div class="modal-body help-content" id="helpContent"></div></dialog>
 <div id="toast" class="toast" role="status" hidden></div>
 <noscript><p>请启用 JavaScript。This app requires JavaScript.</p></noscript>
