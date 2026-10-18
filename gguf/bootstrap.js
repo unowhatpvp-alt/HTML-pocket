@@ -1,5 +1,18 @@
 /* Isolation is scoped to this /gguf/ app, never the parent Pages site. */
 try { document.documentElement.dataset.theme = localStorage.getItem('mono.gguf.theme') || 'light'; } catch {}
+// Fit the app shell to the visible viewport, including a mobile software keyboard.
+// Pinch zoom keeps the existing layout size so browser zoom/panning still works.
+(() => {
+  const viewport = window.visualViewport;
+  const syncHeight = () => {
+    if (viewport && Math.abs(viewport.scale - 1) > 0.01) return;
+    const height = viewport ? viewport.height : window.innerHeight;
+    if (height > 0) document.documentElement.style.setProperty('--app-height', `${height}px`);
+  };
+  syncHeight();
+  window.addEventListener('resize', syncHeight, { passive: true });
+  viewport?.addEventListener('resize', syncHeight, { passive: true });
+})();
 window.monoIsolationReady = (async () => {
   if (!isSecureContext || !('serviceWorker' in navigator) || crossOriginIsolated) return;
   try {
